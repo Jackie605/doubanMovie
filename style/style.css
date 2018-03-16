@@ -1,0 +1,102 @@
+
+.main {
+	position: relative;
+	margin-bottom: 50px;
+	height: 100%;
+}
+footer {
+	position: fixed;
+	bottom: 0;
+	height: 50px;
+	display: flex;
+	background: #eee;
+	width: 100%;
+}
+section {
+	height: 100%;
+	overflow: scroll;
+}
+footer>div {
+	flex: 1;
+	text-align: center;
+	padding:20px;
+	padding-top: 5px;
+}
+footer>div.active {
+	color: #FF5722;
+}
+section a {
+	display: inline;
+	float: left;
+	height: 100%;
+}
+.describe {
+	margin-left: 100px;
+}
+h3 {
+	font-size : 16px;
+}
+.describe span {
+	color: red;
+}
+.describe p {
+	color: #aaa;
+}
+section .span {
+	color: red;
+}
+.wrapper {
+	border-bottom: 1px solid #eee;
+	height: 140px;
+	padding:10px;
+}
+section img {
+	height: 100%;
+}
+.clear::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+.loading {
+	display: none;
+	text-align: center;
+}
+.iconfont.icon-jiazai {
+	font-size: 20px;
+	display: inline-block;
+	animation-name: circling;
+	animation-iteration-count: infinite;
+	animation-duration: 1s;
+	z-index: 100;
+
+}
+@keyframes circling {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+.searchval {
+	margin: 20px 100px 20px 20px;
+	width: 280px;
+	display: block;
+	border-radius: 15px;
+	height: 30px;
+	font-size: 12px;
+	background-color: #eee;
+	padding-left: 10px;
+}
+.searchbtn {
+	margin: 20px 10px 0 0;
+	width: 50px;
+	height: 30px;
+	border: 0;
+	display: inline-block;
+	background-color: orange;
+	color: #fff;
+	float: right;
+	border-radius: 2px;
+}

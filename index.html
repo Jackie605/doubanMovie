@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+	<title>豆瓣电影</title>
+	<script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.12.4/jquery.js"></script>
+	<link rel="stylesheet" href="style/normal.css">
+	<link rel="stylesheet" href="style/style.css">
+	<link rel="stylesheet" href="http://at.alicdn.com/t/font_590144_te1jr3lfnljtt9.css">
+</head>
+<body>
+	<div class="main">
+	<section class="top250">
+	<div class="container">
+	</div>
+	<div class="loading"><span class="iconfont icon-jiazai"></span></div>
+	</section>
+	<section class="america">
+	<div class="container"></div>
+	</section>
+	<section class="search">
+	<button class="searchbtn">搜索</button>
+	<input class="searchval" type="text" placeholder="输入电影或者艺人名字">
+	<div class="container">
+	</div>
+	</section>
+	</div>
+	<footer>
+	<div class='active'>
+	<span class="iconfont icon-paihangbang"></span>
+	<p>TOP250</p>
+	</div>
+	<div>
+	<span class="iconfont icon-paixing1">
+	</span>
+	<p>北美排行榜</p>
+	</div>
+	<div>
+	<span class="iconfont icon-search"></span>
+	<p>搜索</p>
+	</div>
+	</footer>
+	<script>
+	var sortApi = {
+			top250: {
+				url:"https://api.douban.com/v2/movie/top250",
+				index:0,
+				isFinished:false
+			},
+		    america: {
+				url:"https://api.douban.com/v2/movie/us_box",
+				index:0,
+				isFinished:false
+		    },
+		    search: {
+		    	url:"",
+				index:0,
+				isFinished:false
+		    }
+		};
+	var app = {
+		init: function(){
+			this.bind();
+			this.load('top250');
+			this.load('america');
+			$('section').eq(0).fadeIn().siblings('section').hide();
+		},
+		bind: function(){
+			$('footer').on('click','div',function(){
+			$(this).addClass('active').siblings().removeClass('active');
+			var index = $(this).index();
+			$('section').eq(index).fadeIn().siblings().hide();
+
+	})
+
+		},
+		load: function (sectionName){
+	$.ajax(
+	{
+		url: sortApi[sectionName].url,
+		data: {
+			start: sortApi[sectionName].index,
+			count: 20
+		},
+		type: "GET",
+		dataType: "jsonp"
+	}).done(function(data){
+		console.log(data)
+		handleData(data,function(html){
+			$('.' + sectionName + ' .container').append(html);
+		})
+		sortApi[sectionName].index+=20;
+		sortApi[sectionName].isFinished = sortApi[sectionName].index > data.total?true:false;
+    })
+    .fail(function(){
+       	console.log("an error occurs")
+       })
+    }
+}
+app.init()
+// app.scrollMonitor('top250');
+	//数据的回调函数
+	function handleData(data,callback){
+		var arr = data.subjects;
+		var newhtml;
+		$(arr).each(function(index,item){
+			item = item.subject?item.subject:item;
+			var src = item.alt;
+			var title = item.title;
+			var genres = item.genres.join("/");
+			var imgSrc = item.images.medium;
+			var rating = item.rating.average;
+			var actors = item.casts.map(
+				function(item){
+					return item.name;
+				}
+			).join("、");
+			var director = (function(){
+				if(item.directors.length == 1){
+				return item.directors[0].name;
+				}else {
+				return item.directors.map(function(dir){
+				return dir.name;
+			}).join("、")}})();
+			var year = item.year;
+			var collectionCount = item.collect_count;
+			var $html =$(concactHtml(imgSrc,src,title,rating,collectionCount,year,genres,director,actors));
+			callback($html);
+		})
+	}
+	function concactHtml(img,src,title,score,collect,year,sort,director,actor){
+		var html = '';
+		html+= '<div class="clear wrapper">'
+		html+= '<a href="'
+		html+= src;
+		html+= '">';
+		html+= '<img src=';
+		html+= img;
+		html+= ' alt="">';
+		html+= '</a><div class="describe"><h3>';
+		html+= title;
+		html+= '</h3><p><span>'
+		html+= score;
+		html+= '</span>分/';
+		html+= collect;
+		html+= '收藏</p><p>';
+		html+= year;
+		html+= '/' + sort;
+		html+= '<p>导演:'+ director + '</p>';
+		html+= '<p>主演:'+ actor + '</p>';
+		html+= '</div></div>';
+		return html;
+	}
+	function isToEnd(sectionName){
+		return $(sectionName).scrollTop() + $(sectionName).height() +10> $(sectionName+">.container").height();
+	}
+	function scrollLoad(){
+		if(isToEnd()){
+			$('.loading').show();
+			app.load()
+		}
+	}
+   
+   var timer;
+   function start(){
+   		if(timer){
+   			clearTimeout(timer)
+   		}
+   		timer=setTimeout(function(){
+   			if(isToEnd('.top250')){
+   				$('.loading').show()
+   				app.load('top250');
+   			}else {
+   				$('.loading').hide()
+   			}
+   		
+   },300)}
+   $('.top250').scroll(function(){
+   	if(!sortApi['top250'].isFinished){
+   	start()
+   }else {
+   	$('.loading').hide()
+   }
+   });
+   $('.searchbtn').click(function(){
+   	var searchurl = 'https://api.douban.com/v2/movie/search?q='
+    searchurl+= $('.searchval').val();
+   	sortApi.search.url = searchurl;
+   	app.load('search')
+   	return searchurl;
+   })
+	</script>
+</body>
+</html>
